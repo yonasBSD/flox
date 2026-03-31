@@ -239,6 +239,18 @@ impl SelectedOutputs {
     }
 }
 
+impl std::fmt::Display for SelectedOutputs {
+    // SelectedOutputs is the post-parse, manifest-side value, so its Display
+    // mirrors its serialized form ("all" for All, comma-joined names for
+    // Specific) rather than the CLI parser grammar used by RawSelectedOutputs.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::All(_) => write!(f, "all"),
+            Self::Specific(names) => write!(f, "{}", names.join(",")),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum AllSentinel {
