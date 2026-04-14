@@ -276,15 +276,13 @@ impl Publish {
                 message::updated(formatdoc! {"
                     Package already published.
 
-                    Source revision date: {date}
+                    Originally published: {date}
                     Source revision: {rev}
-                    View package: {url}
                     ",
                     date = resp
-                        .source_rev_date
+                        .published_at
                         .map_or_else(|| "unknown".to_string(), |d| d.to_string()),
                     rev = resp.source_rev.unwrap_or_default(),
-                    url = resp.catalog_page_url.unwrap_or_default(),
                 });
                 return Ok(());
             },
@@ -403,9 +401,9 @@ mod tests {
     async fn test_publish_skips_build_on_duplicate() {
         let client = mock_client_with(vec![Response::CheckBuild(CheckBuildResponse {
             already_published: true,
-            source_rev_date: None,
+            published_at: None,
             source_rev: Some("abc123".to_string()),
-            catalog_page_url: Some("https://hub.flox.dev/packages/myorg/mypkg".to_string()),
+            source_rev_date: None,
         })]);
 
         let result = client
@@ -453,9 +451,9 @@ mod tests {
         // pre-check is reachable.
         let client = mock_client_with(vec![Response::CheckBuild(CheckBuildResponse {
             already_published: false,
-            source_rev_date: None,
+            published_at: None,
             source_rev: None,
-            catalog_page_url: None,
+            source_rev_date: None,
         })]);
 
         // A successful non-duplicate response means check_build_already_recorded
@@ -488,9 +486,9 @@ mod tests {
     async fn test_publish_normal_flow_on_new() {
         let client = mock_client_with(vec![Response::CheckBuild(CheckBuildResponse {
             already_published: false,
-            source_rev_date: None,
+            published_at: None,
             source_rev: None,
-            catalog_page_url: None,
+            source_rev_date: None,
         })]);
 
         let result = client
