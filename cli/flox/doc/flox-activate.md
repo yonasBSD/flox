@@ -107,9 +107,6 @@ See [`manifest.toml(5)`](./manifest.toml.md) for more details on shell hooks.
    To start services by default without requiring `-s`, set
    `services.auto-start = true` in the manifest.
 
-   This flag is currently incompatible with "in-place" activations,
-   but this feature will be added in the future.
-
    The services started with this flag will be cleaned up once the last
    activation of this environment terminates.
 
