@@ -88,6 +88,19 @@ The `build.<package>.version` field can be specified in one of the following way
 1. **as read from a file**: `version.file = "<path>"`
 1. **as returned by a command**: `version.command = "<cmd> <args>"`
 
+### Catalog imports for Nix expression builds
+
+Nix expression builds (packages defined as `.nix` files under `.flox/pkgs/`)
+can depend on packages from external catalogs.
+Declare catalog sources in
+[`nix-builds.toml(5)`](./nix-builds.toml.md),
+then run `flox build update-catalogs` to resolve and lock them.
+The resulting lockfile pins every catalog to a specific revision,
+ensuring reproducible builds.
+
+See [`flox-build-update-catalogs(1)`](./flox-build-update-catalogs.md)
+and [`nix-builds.toml(5)`](./nix-builds.toml.md) for details.
+
 # OPTIONS
 
 `<package>`
@@ -96,9 +109,15 @@ The `build.<package>.version` field can be specified in one of the following way
     in the environment's `manifest.toml`.
 
 `--stability <stability>`
-:   Perform a nix expression build using a base package set of the given stability
-    as tracked by the catalog server.
-    Can not be used with manifest base builds.
+:   Perform a nix expression build using a base package set of the given
+    stability as tracked by the catalog server.
+    A stability (e.g., `"stable"`) identifies a curated nixpkgs revision
+    managed by the catalog server.
+    When omitted, the base package set is derived from the environment's
+    `toplevel` group; if no `toplevel` group exists, the `"stable"`
+    stability is used by default.
+    An explicit `--stability` value overrides both of these defaults.
+    Cannot be used with manifest builds.
 
 
 ```{.include}

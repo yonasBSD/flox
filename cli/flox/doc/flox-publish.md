@@ -83,6 +83,12 @@ personal Catalog, the package would appear in `flox search` as `myuser/hello`.
 When installing the package, it is downloaded directly from the Catalog Store
 that it was published to.
 
+Published packages on FloxHub are also available as catalog imports for
+Nix expression builds.
+Other environments can declare a FloxHub catalog in
+[`nix-builds.toml(5)`](./nix-builds.toml.md) and reference the published
+packages directly from `.nix` expressions under `.flox/pkgs/`.
+
 ## Sharing published packages
 
 a package published to an individual user's Catalog may only be seen and
@@ -111,9 +117,15 @@ Note that this is a paid feature available with Flox for Teams.
     'flox config'.
 
 `--stability <stability>`
-:   Perform a nix expression build using a base package set of the given stability
-    as tracked by the catalog server.
-    Can not be used with manifest base builds.
+:   Perform a nix expression build using a base package set of the given
+    stability as tracked by the catalog server.
+    A stability (e.g., `"stable"`) identifies a curated nixpkgs revision
+    managed by the catalog server.
+    When omitted, the base package set is derived from the environment's
+    `toplevel` group; if no `toplevel` group exists, the `"stable"`
+    stability is used by default.
+    An explicit `--stability` value overrides both of these defaults.
+    Cannot be used with manifest builds.
 
 ```{.include}
 ./include/dir-environment-options.md
@@ -123,5 +135,7 @@ Note that this is a paid feature available with Flox for Teams.
 # SEE ALSO
 
 [`flox-build(1)`](./flox-build.md)
+[`flox-build-update-catalogs(1)`](./flox-build-update-catalogs.md)
 [`flox-activate(1)`](./flox-activate.md)
 [`manifest.toml(5)`](./manifest.toml.md)
+[`nix-builds.toml(5)`](./nix-builds.toml.md)
