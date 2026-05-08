@@ -205,6 +205,84 @@ FLOX_ACTIVATE_TRACE=1 result/bin/flox activate [args]
     identify them as tests. Name tests descriptively for what
     they verify (e.g.,
     `gather_repo_meta_no_upstream_suggests_set_upstream`).
+  - **Type safety at function boundaries:** Parse strings
+    at entry points (CLI arg parsing, API response
+    deserialization), not deep in business logic. Before
+    accepting a string parameter, check whether a domain type
+    already exists: `Url` for URLs, `PackageSystem` for
+    architecture names, `NixFlakeref` for flake refs,
+    `BaseCatalogUrl` for catalog URLs. Check the relevant
+    provider module for existing types, e.g. when working with
+    catalog information check `cli/flox-catalog/src/types.rs`.
+  - **User-visible message syntax, structure, and content:**
+    - Use complete sentences. Do not use "I", "we", or "flox"
+      as the subject — drop it instead
+      ("did not find an environment", not
+      "flox did not find an environment").
+      Exception: the first sentence of an error may omit the
+      subject for easier parsing.
+    - Write errors in sentence case, ending with a full stop.
+      Exception: omit the full stop when system information
+      follows on the same line.
+    - Strive for one sentence per line.
+    - **Line 1:** A generic statement of the problem written
+      for a user who has never read the source.
+      Example: "Environment already exists at {location}."
+    - **Line 2+:** No dead ends — suggest a next step unless
+      there truly is none. Put the most actionable information
+      last.
+    - **Avoid the error when possible:** If you are certain
+      there is a single next step, take it automatically and
+      print a sentence describing what you did.
+      Example: `flox push` without auth should run
+      `flox auth login` and print "Auth information not found.
+      Redirecting to 'flox auth login'."
+    - **Do not surface internal tool output:** Intercept nix
+      or git errors and rewrite them at the product level.
+  - **CLI output conventions:**
+    - **Brand names:** "Flox" (capital F), except when
+      referring to CLI commands directly (`flox install`).
+      "FloxHub" (one word, capital F and H). "Flox Catalog"
+      and "Flox Factory" (both words capitalized). Use the
+      article where needed: "search the Flox Catalog".
+    - **Parameter notation in messages:**
+      `<REQUIRED_PARAM>` for required values,
+      `[OPTIONAL_PARAM]` for optional values — UPPERCASE,
+      angle or square brackets.
+      Example: `flox install <PACKAGE> --dir=<PATH>`
+    - **Emoji usage:** One emoji per response, two spaces
+      after the emoji. Standard map:
+      `❌ ERROR:` (errors), `⚠️` (warnings),
+      `✨` (creation), `✅` (success/confirmation),
+      `🗑️` (removal), `🚀` (new release available),
+      `ℹ️` (general notes), `🤖` (announcements unrelated
+      to the command), `⬇️`/`⬆️` (pull/push).
+    - **Suggest next steps** at the end of success messages
+      when there is an obvious path forward. Use "shell
+      points" for multiple options:
+      ```
+      Next:
+        $ flox search <PACKAGE>    <- Search for a package
+        $ flox install <PACKAGE>   <- Install a package
+        $ flox activate            <- Enter the environment
+      ```
+    - **Line length:** Wrap output at 80 characters.
+    - **Voice:** Active voice, US English, plain language.
+      Be concise — describe facts as if speaking to a
+      junior engineer seeing the terminal for the first time.
+  - **Naming new helpers:** Before introducing a helper
+    function, search for the naming convention used by similar
+    helpers in the same file. Follow established patterns
+    (`str_to_x` for query-param parsers in `flox-catalog`,
+    `with_x` / `from_x` patterns elsewhere) rather than
+    introducing a new convention.
+  - **Deprecated infrastructure:** Before adding an
+    implementation to an existing pattern, check for
+    `// deprecated`, `// todo: remove`, or inline notes
+    indicating the pattern is being phased out. When trait
+    methods must be satisfied but the implementation is
+    intentionally unused, use `unimplemented!()` and note
+    it in the PR rather than adding to the deprecated pattern.
 - **Commits:** Conventional commits format (`feat:`, `fix:`, `chore:`, etc.). Use `cz commit` for interactive commits
 - **Rust 2024 edition** for main crates
 
