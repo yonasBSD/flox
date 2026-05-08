@@ -205,23 +205,40 @@ FLOX_ACTIVATE_TRACE=1 result/bin/flox activate [args]
     identify them as tests. Name tests descriptively for what
     they verify (e.g.,
     `gather_repo_meta_no_upstream_suggests_set_upstream`).
-  - **Type safety at function boundaries:** Prefer domain types
-    over `String`/`&str` at function signatures. Parse strings
+  - **Type safety at function boundaries:** Parse strings
     at entry points (CLI arg parsing, API response
-    deserialization) — not deep in business logic. Before
+    deserialization), not deep in business logic. Before
     accepting a string parameter, check whether a domain type
     already exists: `Url` for URLs, `PackageSystem` for
-    architecture names, `NixFlakeRef` for flake refs,
-    `BaseCatalogUrl` for catalog URLs. Check
-    `cli/flox-catalog/src/types.rs` and the relevant
-    provider module for existing types.
-  - **User-visible message vocabulary:** Warning and error
-    messages must use user vocabulary, not internal subsystem
-    names or implementation details. Before shipping a message,
-    ask: "Would a user who has never read the source understand
-    this?" Describe what the user was trying to do, what
-    failed, and what happens next — not what internal component
-    failed or what code path was taken.
+    architecture names, `NixFlakeref` for flake refs,
+    `BaseCatalogUrl` for catalog URLs. Check the relevant
+    provider module for existing types, e.g. when working with
+    catalog information check `cli/flox-catalog/src/types.rs`.
+  - **User-visible message syntax, structure, and content:**
+    - Use complete sentences. Do not use "I", "we", or "flox"
+      as the subject — drop it instead
+      ("did not find an environment", not
+      "flox did not find an environment").
+      Exception: the first sentence of an error may omit the
+      subject for easier parsing.
+    - Write errors in sentence case, ending with a full stop.
+      Exception: omit the full stop when system information
+      follows on the same line.
+    - Strive for one sentence per line.
+    - **Line 1:** A generic statement of the problem written
+      for a user who has never read the source.
+      Example: "Environment already exists at {location}."
+    - **Line 2+:** No dead ends — suggest a next step unless
+      there truly is none. Put the most actionable information
+      last.
+    - **Avoid the error when possible:** If you are certain
+      there is a single next step, take it automatically and
+      print a sentence describing what you did.
+      Example: `flox push` without auth should run
+      `flox auth login` and print "Auth information not found.
+      Redirecting to 'flox auth login'."
+    - **Do not surface internal tool output:** Intercept nix
+      or git errors and rewrite them at the product level.
   - **Naming new helpers:** Before introducing a helper
     function, search for the naming convention used by similar
     helpers in the same file. Follow established patterns
