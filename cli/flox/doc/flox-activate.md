@@ -15,7 +15,7 @@ flox [<general-options>] activate
      [-d=<path> | -r=<owner>/<name>]
      [-t]
      [--print-script]
-     [-s]
+     [--start-services | --no-start-services]
      [-m=(dev|run)]
      [-g=<generation>]
      [-c=<shell command> | -- <exec command>...]
@@ -104,6 +104,9 @@ See [`manifest.toml(5)`](./manifest.toml.md) for more details on shell hooks.
    If no services are running, the services from the manifest will be started,
    otherwise a warning will displayed and activation will continue.
 
+   To start services by default without requiring `-s`, set
+   `services.auto-start = true` in the manifest.
+
    This flag is currently incompatible with "in-place" activations,
    but this feature will be added in the future.
 
@@ -112,6 +115,9 @@ See [`manifest.toml(5)`](./manifest.toml.md) for more details on shell hooks.
 
    A remote environment can only have a single set of running services,
    regardless of how many times the environment is activated concurrently.
+
+`--no-start-services`
+:  Don't start services even if configured in manifest with `auto-start = true`.
 
 `-m (dev|run)`, `--mode (dev|run)`
 :  Activate the environment in either "dev" or "run" mode.

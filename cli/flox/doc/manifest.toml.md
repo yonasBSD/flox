@@ -473,7 +473,13 @@ vars.PGPORT = "9001"
 This would define a service called `database` that configures and starts a
 PostgreSQL database.
 
-The full set of options is show below:
+Top-level options for the `[services]` block are:
+
+`auto-start`
+:   Whether to start all services automatically on `flox activate`.
+    Can be suppressed with `--no-start-services`.
+
+The full set of options for an individual service descriptor is:
 ```
 ServiceDescriptor ::= {
   command    = STRING
