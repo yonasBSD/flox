@@ -239,6 +239,37 @@ FLOX_ACTIVATE_TRACE=1 result/bin/flox activate [args]
       Redirecting to 'flox auth login'."
     - **Do not surface internal tool output:** Intercept nix
       or git errors and rewrite them at the product level.
+  - **CLI output conventions:**
+    - **Brand names:** "Flox" (capital F), except when
+      referring to CLI commands directly (`flox install`).
+      "FloxHub" (one word, capital F and H). "Flox Catalog"
+      and "Flox Factory" (both words capitalized). Use the
+      article where needed: "search the Flox Catalog".
+    - **Parameter notation in messages:**
+      `<REQUIRED_PARAM>` for required values,
+      `[OPTIONAL_PARAM]` for optional values — UPPERCASE,
+      angle or square brackets.
+      Example: `flox install <PACKAGE> --dir=<PATH>`
+    - **Emoji usage:** One emoji per response, two spaces
+      after the emoji. Standard map:
+      `❌ ERROR:` (errors), `⚠️` (warnings),
+      `✨` (creation), `✅` (success/confirmation),
+      `🗑️` (removal), `🚀` (new release available),
+      `ℹ️` (general notes), `🤖` (announcements unrelated
+      to the command), `⬇️`/`⬆️` (pull/push).
+    - **Suggest next steps** at the end of success messages
+      when there is an obvious path forward. Use "shell
+      points" for multiple options:
+      ```
+      Next:
+        $ flox search <PACKAGE>    <- Search for a package
+        $ flox install <PACKAGE>   <- Install a package
+        $ flox activate            <- Enter the environment
+      ```
+    - **Line length:** Wrap output at 80 characters.
+    - **Voice:** Active voice, US English, plain language.
+      Be concise — describe facts as if speaking to a
+      junior engineer seeing the terminal for the first time.
   - **Naming new helpers:** Before introducing a helper
     function, search for the naming convention used by similar
     helpers in the same file. Follow established patterns
