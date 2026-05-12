@@ -20,7 +20,6 @@ use flox_rust_sdk::providers::publish::{
 use indoc::formatdoc;
 use nef_lock_catalog::lock::NixFlakeref;
 use tracing::{debug, info_span, instrument, warn};
-use url::Url;
 
 use super::{DirEnvironmentSelect, dir_environment_select};
 use crate::commands::build::{
@@ -252,20 +251,20 @@ impl Publish {
                 ""
             });
         let system_override_inner = publish_config.system_override.into_inner();
-        let system_str = system_override_inner
-            .as_deref()
-            .unwrap_or(flox.system.as_str());
-        let system = system_str
-            .parse::<SystemEnum>()
-            .context("invalid system value for dedup pre-check")?;
-        let source_url = Url::parse(&publish_provider.env_metadata.build_repo_meta.url)
-            .context("failed to parse build repo URL for dedup pre-check")?;
+        let system = {
+            let system_str = system_override_inner
+                .as_deref()
+                .unwrap_or(flox.system.as_str());
+            system_str
+                .parse::<SystemEnum>()
+                .context("invalid system value for dedup pre-check")?
+        };
         let check_result = flox
             .catalog_client
             .check_build_already_recorded(
                 &catalog_name,
                 publish_provider.package_metadata.package.name().as_ref(),
-                &source_url,
+                &publish_provider.env_metadata.build_repo_meta.url,
                 &publish_provider.env_metadata.build_repo_meta.rev,
                 nixpkgs_rev,
                 system,
