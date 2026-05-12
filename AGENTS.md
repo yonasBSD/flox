@@ -151,8 +151,12 @@ FLOX_ACTIVATE_TRACE=1 result/bin/flox activate [args]
   - Structs should derive `Clone` and `Debug`
   - Use structured log and tracing fields; don't interpolate variables into single strings
   - Use `assert_eq!` on entire structs in tests so that it's easier to debug failures and catch new fields; don't `assert!` or `assert_eq!` on individual fields
-  - Add `use` statements to modules; don't inline absolute paths and don't add to nearest function
-  - Always update `use` statements when moving code between modules; don't re-export existing names
+  - `use` guidelines
+    - Import from all flox crates with `use` rather than qualifying with `::`
+    - For imports of external dependencies, qualifying with `::` is acceptable
+      if it improves readability
+    - Add `use` statements to modules; don't add to nearest function
+    - Always update `use` statements when moving code between modules; don't re-export existing names
   - **Error handling architecture:**
     - When improving error messages, first understand the existing
       error type hierarchy before adding string-matching at call
@@ -190,10 +194,9 @@ FLOX_ACTIVATE_TRACE=1 result/bin/flox activate [args]
     triggers it. The message must describe what is actually wrong,
     not an approximation inferred from a surface reading of the
     code.
-  - Use `formatdoc!` (from `indoc`) for multiline formatted
-    strings rather than `\n\` line continuations in function
-    bodies. Proc-macro attributes (`#[error(...)]`,
-    `#[bpaf(...)]`) require string literals and cannot use
+  - Use `formatdoc!` or `indoc!` (both from `indoc`) for multiline formatted
+    strings. An exception is proc-macro attributes like (`#[error(...)]` and
+    `#[bpaf(...)]`) which require string literals and cannot use
     macros.
   - **User-facing string literals:** Prefer stretching past the
     line-width limit rather than breaking messages with `\`
