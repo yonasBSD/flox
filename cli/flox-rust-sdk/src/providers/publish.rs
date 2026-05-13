@@ -144,7 +144,7 @@ pub trait Publisher {
 /// Simple struct to hold the information of a locked URL.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RemoteBuildRepoMetadata {
-    pub url: String,
+    pub url: Url,
     pub ref_: String,
     pub rev: String,
     pub rev_count: u64,
@@ -186,7 +186,7 @@ impl CheckedEnvironmentMetadata {
     fn remote_flakeref(&self) -> Result<NixFlakeref, PublishError> {
         let value = json! ({
           "type": "git",
-          "url": self.build_repo_meta.url,
+          "url": self.build_repo_meta.url.as_str(),
           "rev": self.build_repo_meta.rev,
           "dir": self.rel_expression_build_base_dir.to_string_lossy()
         });
@@ -610,7 +610,7 @@ where
             .create_package(
                 &catalog_name,
                 self.package_metadata.package.name().as_ref(),
-                &self.env_metadata.build_repo_meta.url,
+                self.env_metadata.build_repo_meta.url.as_str(),
             )
             .await
             .map_err(PublishError::CatalogError)?;
@@ -683,7 +683,7 @@ where
             locked_base_catalog_url: Some(self.package_metadata.base_catalog_ref.to_string()),
             base_catalog_rev_count: None,
             base_catalog_rev_date: None,
-            url: self.env_metadata.build_repo_meta.url.clone(),
+            url: self.env_metadata.build_repo_meta.url.to_string(),
             rev: self.env_metadata.build_repo_meta.rev.clone(),
             rev_count: self.env_metadata.build_repo_meta.rev_count as i64,
             rev_date: self.env_metadata.build_repo_meta.rev_date,
@@ -1067,7 +1067,7 @@ fn gather_build_repo_meta(
         GitUrl::parse_to_url(&remote_info.url).map_err(|err| build_repo_err(&err.to_string()))?;
 
     Ok(RemoteBuildRepoMetadata {
-        url: url.to_string(),
+        url,
         rev: status.rev,
         rev_count: status.rev_count,
         rev_date: status.rev_date,
@@ -1406,7 +1406,7 @@ pub mod tests {
         let meta = check_environment_metadata(&flox, &env).unwrap();
 
         let build_repo_meta = meta.build_repo_meta;
-        assert!(build_repo_meta.url.contains(&remote_uri));
+        assert!(build_repo_meta.url.as_str().contains(&remote_uri));
         assert!(
             build_repo
                 .contains_commit(build_repo_meta.rev.as_str())
@@ -1773,7 +1773,7 @@ pub mod tests {
 
             toplevel_catalog_ref: Some(catalog_page_nixpkgs_https_url.clone()),
             build_repo_meta: RemoteBuildRepoMetadata {
-                url: "https://dummy.local".to_string(),
+                url: Url::parse("https://git.example.com/test/repo.git").unwrap(),
                 rev: "dummy".to_string(),
                 ref_: "dummy".to_string(),
                 rev_count: 0,
