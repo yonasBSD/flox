@@ -355,10 +355,12 @@ impl BaseCatalogUrl {
         Url::parse(&format!("git+{}&shallow=1", self.0.as_str())).map_err(BaseCatalogUrlError)
     }
 
-    pub fn rev(&self) -> Option<&str> {
-        self.0
-            .split_once("?rev=")
-            .map(|(_, rev)| rev.split_once('&').map(|(r, _)| r).unwrap_or(rev))
+    pub fn rev(&self) -> Option<String> {
+        Url::parse(&self.0)
+            .ok()?
+            .query_pairs()
+            .find(|(k, _)| k == "rev")
+            .map(|(_, v)| v.into_owned())
     }
 }
 
@@ -465,18 +467,39 @@ mod tests {
         let url = BaseCatalogUrl::from(
             "https://github.com/NixOS/nixpkgs?rev=4d2650789dfa690b56eb541754c06b624fe2ea03",
         );
-        assert_eq!(url.rev(), Some("4d2650789dfa690b56eb541754c06b624fe2ea03"));
+        assert_eq!(
+            url.rev().as_deref(),
+            Some("4d2650789dfa690b56eb541754c06b624fe2ea03")
+        );
     }
 
     #[test]
     fn base_catalog_url_rev_handles_additional_params() {
         let url = BaseCatalogUrl::from("https://github.com/NixOS/nixpkgs?rev=abc123&foo=bar");
-        assert_eq!(url.rev(), Some("abc123"));
+        assert_eq!(url.rev().as_deref(), Some("abc123"));
     }
 
     #[test]
     fn base_catalog_url_rev_returns_none_without_rev() {
         let url = BaseCatalogUrl::from("https://github.com/NixOS/nixpkgs");
+        assert_eq!(url.rev(), None);
+    }
+
+    #[test]
+    fn base_catalog_url_rev_handles_non_first_param() {
+        let url = BaseCatalogUrl::from("https://github.com/NixOS/nixpkgs?ref=main&rev=abc123");
+        assert_eq!(url.rev().as_deref(), Some("abc123"));
+    }
+
+    #[test]
+    fn base_catalog_url_rev_decodes_percent_encoded() {
+        let url = BaseCatalogUrl::from("https://github.com/NixOS/nixpkgs?rev=abc%2Fdef");
+        assert_eq!(url.rev().as_deref(), Some("abc/def"));
+    }
+
+    #[test]
+    fn base_catalog_url_rev_returns_none_for_malformed_url() {
+        let url = BaseCatalogUrl::from("not a url");
         assert_eq!(url.rev(), None);
     }
 
