@@ -461,7 +461,12 @@ impl Activate {
             invocation_type: Some(invocation_type),
             remove_after_reading: true,
             metrics_uuid: flox.metrics_device_uuid,
-            capture_env_diff: flox.features.auto_activate && !already_active,
+            auto_activate: flox.features.auto_activate,
+            flox_bin: std::env::current_exe()
+                .ok()
+                .and_then(|p| p.to_str().map(String::from))
+                .unwrap_or_else(|| "flox".to_string()),
+            auto_activate_fish_mode: config.flox.auto_activate_fish_mode,
         };
 
         let tempfile = tempfile::NamedTempFile::new_in(flox.temp_dir)?;

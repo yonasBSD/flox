@@ -148,6 +148,8 @@ fn startup_ctx(
                 flox_activate_tracer: activate_tracer.to_string(),
                 flox_activations,
                 clean_up,
+                auto_activate: ctx.auto_activate,
+                flox_bin: ctx.flox_bin.clone(),
             })
         },
         ShellWithPath::Fish(_) => StartupArgs::Fish(FishStartupArgs {
@@ -162,6 +164,9 @@ fn startup_ctx(
             flox_activate_tracer: activate_tracer.to_string(),
             flox_activations,
             clean_up,
+            auto_activate: ctx.auto_activate,
+            flox_bin: ctx.flox_bin.clone(),
+            auto_activate_fish_mode: ctx.auto_activate_fish_mode,
         }),
         ShellWithPath::Tcsh(_) => StartupArgs::Tcsh(TcshStartupArgs {
             flox_activate_tracelevel: subsystem_verbosity,
@@ -175,6 +180,8 @@ fn startup_ctx(
             flox_activate_tracer: activate_tracer.to_string(),
             flox_activations,
             clean_up,
+            auto_activate: ctx.auto_activate,
+            flox_bin: ctx.flox_bin.clone(),
         }),
         ShellWithPath::Zsh(_) => StartupArgs::Zsh(ZshStartupArgs {
             flox_activate_tracelevel: subsystem_verbosity,
@@ -184,6 +191,8 @@ fn startup_ctx(
             flox_env_project: env_project.clone(),
             flox_env_description: Some(ctx.attach_ctx.env_description.clone()),
             clean_up,
+            auto_activate: ctx.auto_activate,
+            flox_bin: ctx.flox_bin.clone(),
         }),
     };
 

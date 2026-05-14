@@ -6,6 +6,7 @@ use std::{env, fs};
 use anyhow::{Context, Result};
 use config::{Config as HierarchicalConfig, Environment};
 use flox_catalog::{AuthnMode, SearchLimit};
+use flox_core::activate::context::AutoActivateFishMode;
 use flox_core::data::environment_ref::RemoteEnvironmentRef;
 use flox_core::{WriteError, write_atomically};
 use flox_rust_sdk::flox::Features;
@@ -122,6 +123,10 @@ pub struct FloxConfig {
     /// Whether to automatically activate environments.
     /// Possible values: `allowed` (default), `prompt`.
     pub auto_activate: Option<AutoActivate>,
+
+    /// Controls how the fish shell hook responds to directory changes.
+    /// Possible values: `eval_on_arrow` (default), `eval_after_arrow`, `disable_arrow`.
+    pub auto_activate_fish_mode: Option<AutoActivateFishMode>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

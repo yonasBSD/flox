@@ -100,10 +100,36 @@ pub struct ActivateCtx {
     #[serde(default)]
     pub metrics_uuid: Option<Uuid>,
 
-    /// Whether to capture the full env diff when attaching.
-    /// Gated behind the auto_activate feature flag.
+    /// Whether to include auto-activation hook code in the activation
+    /// output. Gated behind the auto_activate feature flag.
     #[serde(default)]
-    pub capture_env_diff: bool,
+    pub auto_activate: bool,
+
+    /// Path to the flox binary, used for generating hook code.
+    #[serde(default)]
+    pub flox_bin: String,
+
+    /// Controls how the fish shell hook responds to directory changes.
+    #[serde(default)]
+    pub auto_activate_fish_mode: Option<AutoActivateFishMode>,
+}
+
+/// Fish shell hook mode, matching direnv's `direnv_fish_mode` values.
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, derive_more::Display, Serialize, PartialEq, Eq,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum AutoActivateFishMode {
+    /// Evaluate on prompt and immediately on PWD change (default).
+    #[default]
+    #[display("eval_on_arrow")]
+    EvalOnArrow,
+    /// Evaluate on prompt; defer PWD-change evaluation until before the next command.
+    #[display("eval_after_arrow")]
+    EvalAfterArrow,
+    /// Evaluate on prompt only; ignore directory changes.
+    #[display("disable_arrow")]
+    DisableArrow,
 }
 
 #[derive(Clone, Debug, Deserialize, derive_more::Display, PartialEq, Serialize)]
