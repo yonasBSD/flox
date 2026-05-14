@@ -1456,6 +1456,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "serial_test",
+ "shell-escape",
  "shell_gen",
  "slug",
  "supports-color",
