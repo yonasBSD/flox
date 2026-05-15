@@ -695,7 +695,7 @@ fn notify_upgrades_if_available(
         return Ok(());
     };
 
-    notify_package_upgrades(flox, environment, &info.upgrade_result)?;
+    notify_package_upgrades(flox, environment, &info.upgrade_result, environment_select)?;
 
     Ok(())
 }
@@ -704,6 +704,7 @@ fn notify_package_upgrades(
     flox: &Flox,
     environment: &mut ConcreteEnvironment,
     upgrade_result: &UpgradeResult,
+    environment_select: &EnvironmentSelect,
 ) -> Result<()> {
     let current_lockfile = environment.lockfile(flox)?.into();
     if Some(current_lockfile) != upgrade_result.old_lockfile {
@@ -717,9 +718,14 @@ fn notify_package_upgrades(
         return Ok(());
     }
     let description = environment_description(environment)?;
+    // TODO: this doesn't capture the environment chosen by the user if we prompted
+    let flags = environment_select
+        .to_flags()
+        .map(|flags| format!(" {}", flags.join(" ")))
+        .unwrap_or("".to_string());
     let message = formatdoc! {"
         Upgrades are available for packages in {description}.
-        Use 'flox upgrade --dry-run' for details.
+        Use 'flox upgrade --dry-run{flags}' for details.
     "};
     message::info(message);
     Ok(())
@@ -1101,6 +1107,41 @@ mod upgrade_notification_tests {
             Use 'flox upgrade --dry-run' for details.
 
         "});
+    }
+
+    /// When the user specifies an environment via flags (e.g. `-d <path>` or
+    /// `-r <env>`), the upgrade hint must include those flags so the suggested
+    /// command actually targets the right environment.
+    #[test]
+    fn notification_printed_with_dir_flags() {
+        let (flox, _tempdir) = flox_instance();
+        let (subscriber, writer) = test_subscriber_message_only();
+
+        let path_env = new_named_path_environment_from_env_files(
+            &flox,
+            GENERATED_DATA.join("envs/hello"),
+            "name",
+        );
+        // Capture the parent of the .flox directory so we can construct a
+        // matching EnvironmentSelect::Dir value.
+        let dot_flox_parent = path_env.path.parent().unwrap().to_path_buf();
+        let mut environment = ConcreteEnvironment::Path(path_env);
+
+        write_upgrade_available(&flox, &mut environment);
+
+        let env_select = EnvironmentSelect::Dir(dot_flox_parent.clone());
+
+        tracing::subscriber::with_default(subscriber, || {
+            notify_upgrades_if_available(&flox, &mut environment, &env_select).unwrap();
+        });
+
+        let printed = writer.to_string();
+        let expected_flags = format!("-d {}", dot_flox_parent.display());
+
+        assert!(
+            printed.contains(&format!("'flox upgrade --dry-run {expected_flags}'")),
+            "expected upgrade hint to include env flags, got: {printed}"
+        );
     }
 
     #[test]
